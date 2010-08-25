@@ -135,9 +135,14 @@ end
 
 
 function StealYourCarbon:MERCHANT_SHOW()
-	local hastradebag = HasTradeskillBag()
-	if self.db.upgradewater and not hastradebag then self:UpgradeWater() end
-	local spent, stocklist = 0, hastradebag and self.db.tradestocklist or self.db.stocklist
+	if self.db.upgradewater then self:UpgradeWater() end
+	local stocklist = self.db.stocklist
+	if HasTradeskillBag() then
+		for k,v in pairs(self.db.tradestocklist) do
+			stocklist[k] =v
+		end
+	end
+	local spent = 0
 	for i=1,GetMerchantNumItems() do
 		local link = GetMerchantItemLink(i)
 		local itemID = link and ids[link]
@@ -194,7 +199,12 @@ end
 
 
 function StealYourCarbon:BANKFRAME_OPENED()
-	local stocklist = HasTradeskillBag() and self.db.tradestocklist or self.db.stocklist
+	local stocklist = self.db.stocklist
+	if HasTradeskillBag() then
+		for k,v in pairs(self.db.tradestocklist) do
+			stocklist[k] =v
+		end
+	end
 	for id,num in pairs(stocklist) do
 		local inbag = GetItemCount(id)
 		if inbag < num and GetItemCount(id, true) > inbag then SwapFromBank(id, inbag ~= 0) end
